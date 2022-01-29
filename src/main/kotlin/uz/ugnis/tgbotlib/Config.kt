@@ -19,6 +19,7 @@ import javax.annotation.PreDestroy
 @Configuration
 @ConditionalOnClass(TelegramBotsApi::class)
 class TelegramBotAutoConfiguration(
+
     @Value("\${bot.token}")
     private var token: String,
     @Value("\${bot.username}")
