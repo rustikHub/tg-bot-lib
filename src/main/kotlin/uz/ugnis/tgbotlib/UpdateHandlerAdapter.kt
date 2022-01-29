@@ -1,37 +1,46 @@
 package uz.ugnis.tgbotlib
 
-import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.api.objects.Update
 import org.telegram.telegrambots.meta.bots.AbsSender
-import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
 
-@Component
 class UpdateHandlerAdapterImpl(
-    private val handlersFactory: HandlersFactory,
+    messageHandlers: List<MessageHandler>,
+    callbackHandlers: List<CallbackHandler>,
     private val chatService: ChatService
 ) : UpdateHandlersAdapter {
+    private val messageHandlersMap: MutableMap<String, MessageHandler> = HashMap()
+    private val callbackHandlersMap: MutableMap<String, CallbackHandler> = HashMap()
+    private val allSteps: MutableList<List<String>> = ArrayList()
+
+    init {
+        callbackHandlers.forEach {
+            callbackHandlersMap[it.callbackTypes()[0]] = it
+        }
+        messageHandlers.forEach {
+            messageHandlersMap[it.steps()[0]] = it
+            allSteps.add(it.steps())
+        }
+    }
 
     override fun callbackHandlerAdapter(update: Update, sender: AbsSender) {
         val callback = update.callbackQuery
-        val callbackDataType = callback.data.split("#").first()
-        handlersFactory.handleCallback(callbackDataType, update.callbackQuery, sender)
+        val step = callback.data.split("#").first()
+        try {
+            callbackHandlersMap[step]?.callbackHandle?.invoke(callback, sender)
+        } catch (e: CallbackHandleException) {
+            e.handle()
+        }
     }
 
     override fun messageHandlerAdapter(update: Update, sender: AbsSender) {
-        val chatId = update.run {
-            when {
-                hasInlineQuery() -> inlineQuery.from.id
-                hasChosenInlineQuery() -> chosenInlineQuery.from.id
-                hasCallbackQuery() -> callbackQuery.from.id
-                hasPreCheckoutQuery() -> preCheckoutQuery.from.id
-                else -> message.from.id
-            }
-        }
+        val message = update.message
+        val chatId = message.chatId
         val chat = chatService.findByChatId(chatId)
-        val steps = handlersFactory.messageHandlerSteps.first {
-            it.contains(chat.step)
+        val step = allSteps.find { it.contains(chat.step) }!!.first()
+        try {
+            messageHandlersMap[step]?.messageHandler?.invoke(message, sender)
+        } catch (e: MassageHandleException) {
+            e.handle()
         }
-        handlersFactory.handleMessage(steps.first(), update.message, sender)
     }
-
 }
