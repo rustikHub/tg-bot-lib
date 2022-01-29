@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.utils.addToStdlib.cast
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
@@ -10,7 +11,7 @@ plugins {
 }
 
 group = "uz.ugnis"
-version = "0.0.1-SNAPSHOT"
+version = "0.1.0"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
@@ -19,16 +20,18 @@ repositories {
 publishing {
     repositories {
         maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/rustikHub/tg-bot-lib")
-            credentials {
-                username =  "rustikHub"
-                password = System.getenv("GITHUB_TOKEN")
+            url = uri("PRIVATE GITLAB URL")
+            credentials(HttpHeaderCredentials::class) {
+                name = "Private-Token"
+                value = "PRIVATE-TOKEN"
+            }
+            authentication {
+                create<HttpHeaderAuthentication>("header")
             }
         }
     }
     publications {
-        register<MavenPublication>("gpr") {
+        register("maven", MavenPublication::class) {
             from(components["java"])
         }
     }
