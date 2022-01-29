@@ -34,7 +34,6 @@ class DefaultAuthenticateImpl : Authenticate {
 
 class DefaultChatService : ChatService {
     override fun findByChatId(chatId: Long): Chat {
-        return Chat(565656,"S")
+        return Chat(565656, "S")
     }
-
 }
