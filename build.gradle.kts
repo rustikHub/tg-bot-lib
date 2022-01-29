@@ -22,7 +22,7 @@ publishing {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/rustikHub/tg-bot-lib")
             credentials {
-                username =  System.getenv("GITHUB_NAME")
+                username =  "rustikHub"
                 password = System.getenv("GITHUB_TOKEN")
             }
         }
