@@ -20,10 +20,10 @@ repositories {
 publishing {
     repositories {
         maven {
-            url = uri("PRIVATE GITLAB URL")
+            url = uri("gitlab-url")
             credentials(HttpHeaderCredentials::class) {
                 name = "Private-Token"
-                value = "PRIVATE-TOKEN"
+                value = "token"
             }
             authentication {
                 create<HttpHeaderAuthentication>("header")
@@ -38,7 +38,7 @@ publishing {
 }
 
 dependencies {
-    implementation("org.telegram:telegrambots:5.4.0.1")
+    implementation("org.telegram:telegrambots-spring-boot-starter:5.6.0")
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")

@@ -1,3 +1,4 @@
 package uz.ugnis.tgbotlib
 
-data class Chat(val chatId: Long, val step: String);
+open class Chat(open val chatId: Long, open val step: String);
+

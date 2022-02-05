@@ -10,23 +10,32 @@ class UpdateHandlerAdapterImpl(
 ) : UpdateHandlersAdapter {
     private val messageHandlersMap: MutableMap<String, MessageHandler> = HashMap()
     private val callbackHandlersMap: MutableMap<String, CallbackHandler> = HashMap()
-    private val allSteps: MutableList<List<String>> = ArrayList()
+    private val allSteps: MutableMap<String, String> = mutableMapOf()
+    private val allCallbacks: MutableMap<String, String> = mutableMapOf()
 
     init {
         callbackHandlers.forEach {
             callbackHandlersMap[it.callbackTypes()[0]] = it
+            val first = it.callbackTypes().first()
+            it.callbackTypes().forEach { type ->
+                allCallbacks[type] = first
+            }
         }
         messageHandlers.forEach {
             messageHandlersMap[it.steps()[0]] = it
-            allSteps.add(it.steps())
+            val first = it.steps().first()
+            it.steps().forEach { step ->
+                allSteps[step] = first
+            }
         }
     }
 
     override fun callbackHandlerAdapter(update: Update, sender: AbsSender) {
         val callback = update.callbackQuery
-        val step = callback.data.split("#").first()
+        val callbackType = callback.data.split("#").first()
         try {
-            callbackHandlersMap[step]?.callbackHandle?.invoke(callback, sender)
+            val rootCallbackType = allCallbacks[callbackType]
+            callbackHandlersMap[rootCallbackType]?.callbackHandle(callback, sender)
         } catch (e: CallbackHandleException) {
             e.handle()
         }
@@ -36,9 +45,14 @@ class UpdateHandlerAdapterImpl(
         val message = update.message
         val chatId = message.chatId
         val chat = chatService.findByChatId(chatId)
-        val step = allSteps.find { it.contains(chat.step) }!!.first()
+            ?: if (update.hasMessage() && message.hasText() && message.text.equals("/start")) {
+                chatService.save(Chat(chatId, "/start"))
+            } else {
+                throw UserNotFoundException("Couldn't find user with id $chatId")
+            }
+        val step = allSteps[chat.step]
         try {
-            messageHandlersMap[step]?.messageHandler?.invoke(message, sender)
+            messageHandlersMap[step]?.messageHandle(message, sender)
         } catch (e: MassageHandleException) {
             e.handle()
         }

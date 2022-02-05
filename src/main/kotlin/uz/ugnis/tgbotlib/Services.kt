@@ -15,12 +15,12 @@ interface UpdateHandlersAdapter {
 }
 
 interface CallbackHandler {
-    val callbackHandle: (_callback: CallbackQuery, _sender: AbsSender) -> Unit
+    fun callbackHandle(callback: CallbackQuery, sender: AbsSender)
     fun callbackTypes(): List<String>
 }
 
 interface MessageHandler {
-    val messageHandler: (_message: Message, _sender: AbsSender) -> Unit
+    fun messageHandle(message: Message, sender: AbsSender)
     fun steps(): List<String>
 }
 
@@ -29,6 +29,7 @@ interface Authenticate {
 }
 
 interface ChatService {
-    fun findByChatId(chatId: Long): Chat
+    fun findByChatId(chatId: Long): Chat?
+    fun save(chat: Chat): Chat
 }
 
