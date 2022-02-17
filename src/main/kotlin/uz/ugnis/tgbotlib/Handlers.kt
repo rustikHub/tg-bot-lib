@@ -1,9 +1,5 @@
 package uz.ugnis.tgbotlib
 
-import org.springframework.stereotype.Service
-import org.telegram.telegrambots.meta.api.objects.CallbackQuery
-import org.telegram.telegrambots.meta.api.objects.Message
-import org.telegram.telegrambots.meta.bots.AbsSender
 /*
 
 @Service
